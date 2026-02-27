@@ -82,14 +82,6 @@
         const cube = new THREE.Mesh(geometry, material);
         scene.add(cube);
 
-        // 添加边框 - 高亮边缘
-        const edgesGeometry = geometry.type === 'RoundedBoxGeometry'
-            ? new THREE.BoxGeometry(2, 2, 2)  // 倒角立方体的边框用普通盒子
-            : geometry;
-        const edges = new THREE.EdgesGeometry(edgesGeometry);
-        const lineMaterial = new THREE.LineBasicMaterial({ color: 0xcccccc, linewidth: 1 });
-        const wireframe = new THREE.LineSegments(edges, lineMaterial);
-        cube.add(wireframe);
 
         // 创建环境贴图（CubeCamera 方式，不依赖外部文件）
         const cubeRenderTarget = new THREE.WebGLCubeRenderTarget(256);
@@ -175,10 +167,6 @@
         // 动画循环
         function animate() {
             requestAnimationFrame(animate);
-
-            // 自动旋转
-            cube.rotation.x += 0.003;
-            cube.rotation.y += 0.005;
 
             controls.update();
             renderer.render(scene, camera);
