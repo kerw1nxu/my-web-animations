@@ -119,28 +119,33 @@
         pointLight2.position.set(5, -3, 3);
         scene.add(pointLight2);
 
-        // 尝试加载 HDRI（如果可用）
-        if (typeof THREE.RGBELoader !== 'undefined') {
-            new THREE.RGBELoader()
-                .setDataType(THREE.UnsignedByteType)
-                .load('empty_warehouse_01_4k.hdr',
-                    function(texture) {
-                        const pmremGenerator = new THREE.PMREMGenerator(renderer);
-                        pmremGenerator.compileEquirectangularShader();
-                        const envMap = pmremGenerator.fromEquirectangular(texture).texture;
+        // 加载 HDRI 环境贴图
+        const pmremGenerator = new THREE.PMREMGenerator(renderer);
+        pmremGenerator.compileEquirectangularShader();
 
-                        scene.environment = envMap;
-                        texture.dispose();
-                        pmremGenerator.dispose();
+        new THREE.RGBELoader()
+            .setDataType(THREE.UnsignedByteType)
+            .load('./empty_warehouse_01_4k.hdr',
+                function(texture) {
+                    const envMap = pmremGenerator.fromEquirectangular(texture).texture;
 
-                        console.log('HDRI 加载成功');
-                    },
-                    undefined,
-                    function(error) {
-                        console.log('HDRI 加载失败，使用默认环境:', error);
-                    }
-                );
-        }
+                    scene.environment = envMap;
+                    texture.dispose();
+                    pmremGenerator.dispose();
+
+                    console.log('✅ HDRI 加载成功，仓库环境反射已应用');
+                    document.getElementById('info').innerHTML =
+                        '🔧 铝型材材质<br>HDRI: empty_warehouse_01_4k<br>银白色金属 | 仓库环境反射';
+                },
+                function(progress) {
+                    console.log('HDRI 加载进度:', (progress.loaded / progress.total * 100).toFixed(2) + '%');
+                },
+                function(error) {
+                    console.log('⚠️ HDRI 加载失败:', error);
+                    console.log('使用默认 CubeCamera 环境');
+                    pmremGenerator.dispose();
+                }
+            );
 
         // 轨道控制器
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
