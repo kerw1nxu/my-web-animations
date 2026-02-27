@@ -25,8 +25,9 @@
 </head>
 <body>
     <div id="info">
-        🔧 铝型材材质<br>
-        实时环境反射 | 银白色金属<br>
+        ✨ 亮面金属<br>
+        倒角立方体 | 镜面反射<br>
+        roughness: 0.05 | metalness: 1.0<br>
         自动旋转展示 | 鼠标拖拽查看
     </div>
 
@@ -36,6 +37,8 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/RGBELoader.js"></script>
     <!-- 引入 OrbitControls -->
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <!-- 引入 RoundedBoxGeometry 用于倒角 -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/geometries/RoundedBoxGeometry.js"></script>
 
     <script>
         // 场景
@@ -59,22 +62,32 @@
         renderer.toneMappingExposure = 1.0;
         document.body.appendChild(renderer.domElement);
 
-        // 创建立方体
-        const geometry = new THREE.BoxGeometry(2, 2, 2);
+        // 创建倒角立方体 (亮面金属版本)
+        let geometry;
+        if (typeof THREE.RoundedBoxGeometry !== 'undefined') {
+            // 使用倒角几何体: 宽度, 高度, 深度, 分段数, 倒角半径
+            geometry = new THREE.RoundedBoxGeometry(2, 2, 2, 4, 0.15);
+        } else {
+            // 降级为普通立方体
+            geometry = new THREE.BoxGeometry(2, 2, 2);
+        }
 
-        // 铝型材材质参数 - 先用默认环境
+        // 亮面金属材质 (镜面效果)
         const material = new THREE.MeshStandardMaterial({
-            color: 0xe8e8e8,
-            metalness: 0.95,
-            roughness: 0.35,
-            envMapIntensity: 1.2
+            color: 0xf5f5f5,        // 更亮的银白色
+            metalness: 1.0,         // 完全金属
+            roughness: 0.05,        // 亮面/镜面 (值越小越光滑)
+            envMapIntensity: 1.5    // 增强反射
         });
         const cube = new THREE.Mesh(geometry, material);
         scene.add(cube);
 
-        // 添加边框 - 模拟铝型材边缘
-        const edges = new THREE.EdgesGeometry(geometry);
-        const lineMaterial = new THREE.LineBasicMaterial({ color: 0xaaaaaa });
+        // 添加边框 - 高亮边缘
+        const edgesGeometry = geometry.type === 'RoundedBoxGeometry'
+            ? new THREE.BoxGeometry(2, 2, 2)  // 倒角立方体的边框用普通盒子
+            : geometry;
+        const edges = new THREE.EdgesGeometry(edgesGeometry);
+        const lineMaterial = new THREE.LineBasicMaterial({ color: 0xcccccc, linewidth: 1 });
         const wireframe = new THREE.LineSegments(edges, lineMaterial);
         cube.add(wireframe);
 
@@ -135,7 +148,7 @@
 
                     console.log('✅ HDRI 加载成功，仓库环境反射已应用');
                     document.getElementById('info').innerHTML =
-                        '🔧 铝型材材质<br>HDRI: empty_warehouse_01_4k<br>银白色金属 | 仓库环境反射';
+                        '✨ 亮面金属<br>HDRI: empty_warehouse_01_4k<br>倒角立方体 | 镜面反射';
                 },
                 function(progress) {
                     console.log('HDRI 加载进度:', (progress.loaded / progress.total * 100).toFixed(2) + '%');
