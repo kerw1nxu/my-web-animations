@@ -26,9 +26,9 @@
 <body>
     <div id="info">
         ✨ 亮面金属<br>
-        倒角立方体 | 镜面反射<br>
+        球体 | 镜面反射<br>
         roughness: 0.05 | metalness: 1.0<br>
-        自动旋转展示 | 鼠标拖拽查看
+        鼠标拖拽旋转 | 滚轮缩放
     </div>
 
     <!-- 引入 Three.js -->
@@ -62,15 +62,8 @@
         renderer.toneMappingExposure = 1.0;
         document.body.appendChild(renderer.domElement);
 
-        // 创建倒角立方体 (亮面金属版本)
-        let geometry;
-        if (typeof THREE.RoundedBoxGeometry !== 'undefined') {
-            // 使用倒角几何体: 宽度, 高度, 深度, 分段数, 倒角半径
-            geometry = new THREE.RoundedBoxGeometry(2, 2, 2, 4, 0.15);
-        } else {
-            // 降级为普通立方体
-            geometry = new THREE.BoxGeometry(2, 2, 2);
-        }
+        // 创建球体 (亮面金属版本)
+        const geometry = new THREE.SphereGeometry(1.2, 64, 64);  // 半径1.2, 64分段
 
         // 亮面金属材质 (镜面效果)
         const material = new THREE.MeshStandardMaterial({
@@ -140,7 +133,7 @@
 
                     console.log('✅ HDRI 加载成功，仓库环境反射已应用');
                     document.getElementById('info').innerHTML =
-                        '✨ 亮面金属<br>HDRI: empty_warehouse_01_4k<br>倒角立方体 | 镜面反射';
+                        '✨ 亮面金属<br>HDRI: empty_warehouse_01_4k<br>球体 | 镜面反射';
                 },
                 function(progress) {
                     console.log('HDRI 加载进度:', (progress.loaded / progress.total * 100).toFixed(2) + '%');
