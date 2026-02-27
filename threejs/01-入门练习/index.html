@@ -65,12 +65,14 @@
         // 创建球体 (亮面金属版本)
         const geometry = new THREE.SphereGeometry(1.2, 64, 64);  // 半径1.2, 64分段
 
-        // 亮面金属材质 (镜面效果)
-        const material = new THREE.MeshStandardMaterial({
+        // 亮面金属材质 (镜面效果) - 使用 PhysicalMaterial 获得更好高光
+        const material = new THREE.MeshPhysicalMaterial({
             color: 0xf5f5f5,        // 更亮的银白色
             metalness: 1.0,         // 完全金属
-            roughness: 0.05,        // 亮面/镜面 (值越小越光滑)
-            envMapIntensity: 1.5    // 增强反射
+            roughness: 0.02,        // 更光滑 (接近镜面)
+            envMapIntensity: 1.5,   // 增强反射
+            clearcoat: 1.0,         // 清漆层 (增加高光)
+            clearcoatRoughness: 0.0 // 清漆层光滑度
         });
         const cube = new THREE.Mesh(geometry, material);
         scene.add(cube);
@@ -116,6 +118,16 @@
         const pointLight2 = new THREE.PointLight(0xff8844, 0.5, 100);
         pointLight2.position.set(5, -3, 3);
         scene.add(pointLight2);
+
+        // 添加强烈聚光灯产生明显高光
+        const spotLight = new THREE.SpotLight(0xffffff, 3);
+        spotLight.position.set(5, 5, 5);
+        spotLight.angle = Math.PI / 6;
+        spotLight.penumbra = 0.1;
+        spotLight.decay = 2;
+        spotLight.distance = 50;
+        spotLight.castShadow = true;
+        scene.add(spotLight);
 
         // 加载 HDRI 环境贴图
         const pmremGenerator = new THREE.PMREMGenerator(renderer);
